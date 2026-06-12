@@ -1,0 +1,266 @@
+import { useState } from 'react'
+import './App.css'
+
+const questions = [
+  {
+    id: 'q1',
+    text: 'Как часто за последние 2 недели вы чувствовали нехватку сил?',
+    options: ['Никогда', 'Редко', 'Иногда', 'Часто', 'Почти постоянно'],
+  },
+  {
+    id: 'q2',
+    text: 'После сна вы обычно просыпаетесь:',
+    options: ['Полностью восстановленным', 'Скорее восстановленным', 'По-разному', 'Уставшим', 'Очень уставшим'],
+  },
+  {
+    id: 'q3',
+    text: 'Сколько времени в день остаётся лично на себя?',
+    options: ['Больше 2 часов', '1–2 часа', 'Около часа', 'Меньше часа', 'Практически нет'],
+  },
+  {
+    id: 'q4',
+    text: 'Сколько раз за последний год вы пытались изменить привычки?',
+    options: ['Ни разу', '1–2 раза', '3–5 раз', 'Более 5'],
+  },
+  {
+    id: 'q5',
+    text: 'Обычно ваши попытки длятся:',
+    options: ['Несколько дней', 'Несколько недель', '1–3 месяца', '3–6 месяцев', 'Больше 6 месяцев'],
+  },
+  {
+    id: 'q6',
+    text: 'Что беспокоит вас больше всего прямо сейчас?',
+    options: ['Усталость', 'Апатия', 'Отсутствие дисциплины', 'Тревога', 'Прокрастинация', 'Потеря смысла'],
+  },
+  {
+    id: 'q7',
+    text: 'Насколько вы готовы менять свою жизнь прямо сейчас?',
+    isScale: true,
+  },
+  {
+    id: 'q8',
+    text: 'Если бы у вас был понятный план, вы смогли бы придерживаться его месяц?',
+    isScale: true,
+  },
+  {
+    id: 'q9',
+    text: 'Что чаще всего мешает вам менять привычки?',
+    options: ['Забываю', 'Нет сил', 'Нет времени', 'Теряю мотивацию', 'Слишком много целей', 'Не вижу результата'],
+  },
+  {
+    id: 'q10',
+    text: 'Какая поддержка вам ближе всего?',
+    options: ['Строгая и требовательная', 'Структурированная и чёткая', 'Аналитическая с объяснениями', 'Вдохновляющая и энергичная', 'Тёплая и заботливая'],
+  },
+  {
+    id: 'q11',
+    text: 'Что должно измениться через 30 дней, чтобы вы сказали: «это было полезно»?',
+    isOpen: true,
+  },
+]
+
+function getProfile(answers) {
+  const energy = (4 - (answers[0] ?? 2)) + (4 - (answers[1] ?? 2)) + (4 - (answers[2] ?? 2))
+  const energyScore = Math.round((energy / 12) * 100)
+
+  const readiness = ((answers[3] ?? 1) + (answers[4] ?? 2)) 
+  const readinessScore = Math.round((readiness / 8) * 100)
+
+  if (energyScore < 35) return {
+    type: 'Истощённый борец',
+    desc: 'Мотивация есть — ресурса не хватает. Начнём с восстановления, а не с нагрузки.',
+    emoji: '🔋',
+    firstStep: 'Одна привычка. 2 минуты в день. Ничего больше.',
+  }
+  if (readinessScore > 65) return {
+    type: 'Вечный начинающий',
+    desc: 'Высокий старт, быстрое угасание. Проблема не в желании — в ожиданиях.',
+    emoji: '🚀',
+    firstStep: 'Цель — не результат, а streak. 7 дней подряд — важнее, чем объём.',
+  }
+  if (answers[9] === 1) return {
+    type: 'Аналитик',
+    desc: 'Сначала изучает, потом действует. После старта — один из самых устойчивых профилей.',
+    emoji: '🔬',
+    firstStep: 'Эксперимент на 7 дней. Не обязательство — проверка гипотезы.',
+  }
+  return {
+    type: 'Надёжный исполнитель',
+    desc: 'Стабильный и предсказуемый. Нужна правильная структура — и результат придёт.',
+    emoji: '⚙️',
+    firstStep: 'Чёткий план на неделю. Один слот в расписании под привычку.',
+  }
+}
+
+function App() {
+  const [screen, setScreen] = useState('welcome')
+  const [currentQ, setCurrentQ] = useState(0)
+  const [answers, setAnswers] = useState([])
+  const [scaleValue, setScaleValue] = useState(5)
+  const [openText, setOpenText] = useState('')
+  const [name, setName] = useState('')
+
+  const q = questions[currentQ]
+
+  const next = (value) => {
+    const newAnswers = [...answers, value]
+    setAnswers(newAnswers)
+    if (currentQ < questions.length - 1) {
+      setCurrentQ(currentQ + 1)
+      setScaleValue(5)
+      setOpenText('')
+    } else {
+      setScreen('profile')
+    }
+  }
+
+  const profile = getProfile(answers)
+
+  return (
+    <div className="app">
+
+      {screen === 'welcome' && (
+        <div className="screen-welcome">
+          <div className="welcome-content">
+            <div className="logo">🌱</div>
+            <h1 className="welcome-title">Habby</h1>
+            <p className="welcome-subtitle">
+              Прежде чем двигаться вперёд — нам важно понять, кто перед нами.
+            </p>
+            <p className="welcome-sub2">
+              Это первый шаг к построению твоего личного профиля изменений. Займёт 3–5 минут.
+            </p>
+            <button className="btn-start" onClick={() => setScreen('name')}>
+              Готов
+            </button>
+          </div>
+        </div>
+      )}
+
+      {screen === 'name' && (
+        <div className="screen-diagnostic">
+          <div className="q-block">
+            <p className="q-label">Начнём</p>
+            <h2 className="q-text">Как вас зовут?</h2>
+            <input
+              className="name-input"
+              placeholder="Ваше имя"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              autoFocus
+            />
+            <button
+              className="btn-start"
+              onClick={() => setScreen('diagnostic')}
+              disabled={!name.trim()}
+            >
+              Продолжить
+            </button>
+          </div>
+        </div>
+      )}
+
+      {screen === 'diagnostic' && (
+        <div className="screen-diagnostic">
+          <div className="progress-bar">
+            <div className="progress-fill" style={{ width: `${((currentQ + 1) / questions.length) * 100}%` }} />
+          </div>
+          <div className="q-counter">{currentQ + 1} из {questions.length}</div>
+
+          <div className="q-block">
+            <h2 className="q-text">{q.text}</h2>
+
+            {!q.isScale && !q.isOpen && (
+              <div className="options">
+                {q.options.map((opt, i) => (
+                  <button key={i} className="option-btn" onClick={() => next(i)}>
+                    {opt}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {q.isScale && (
+              <div className="scale-block">
+                <div className="scale-value">{scaleValue}</div>
+                <input
+                  type="range"
+                  min="1"
+                  max="10"
+                  value={scaleValue}
+                  onChange={(e) => setScaleValue(Number(e.target.value))}
+                  className="scale-input"
+                />
+                <div className="scale-labels">
+                  <span>Совсем нет</span>
+                  <span>Полностью да</span>
+                </div>
+                <button className="btn-start" onClick={() => next(scaleValue)}>
+                  Далее
+                </button>
+              </div>
+            )}
+
+            {q.isOpen && (
+              <div className="open-block">
+                <textarea
+                  className="open-textarea"
+                  placeholder="Опишите своими словами..."
+                  value={openText}
+                  onChange={(e) => setOpenText(e.target.value)}
+                  rows={4}
+                />
+                <button
+                  className="btn-start"
+                  onClick={() => next(openText)}
+                  disabled={openText.trim().length < 3}
+                >
+                  Завершить
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {screen === 'profile' && (
+        <div className="screen-profile">
+          <div className="profile-content">
+            <p className="profile-label">Ваш профиль</p>
+            <div className="profile-emoji">{profile.emoji}</div>
+            <p className="profile-greeting">{name}, вы —</p>
+            <h2 className="profile-type">{profile.type}</h2>
+            <p className="profile-desc">{profile.desc}</p>
+            <div className="profile-first-step">
+              <p className="step-label">Первый шаг</p>
+              <p className="step-text">{profile.firstStep}</p>
+            </div>
+            <button className="btn-start" onClick={() => setScreen('home')}>
+              Начать программу
+            </button>
+          </div>
+        </div>
+      )}
+
+      {screen === 'home' && (
+        <div className="screen-home">
+          <div className="home-header">
+            <p className="home-greeting">Привет, {name} 👋</p>
+            <p className="home-day">День 1</p>
+          </div>
+          <div className="action-card">
+            <div className="action-cue">☀️ Сегодняшнее действие · 2 мин</div>
+            <p className="action-text">Выпейте стакан воды до того как открыть телефон</p>
+            <p className="action-why">Гидратация с утра запускает метаболизм и даёт мозгу сигнал к активности</p>
+            <button className="btn-done" onClick={() => alert('Отлично! 🌱 День засчитан')}>
+              ✓ Сделал
+            </button>
+          </div>
+        </div>
+      )}
+
+    </div>
+  )
+}
+
+export default App
