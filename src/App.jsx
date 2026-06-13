@@ -307,16 +307,15 @@ function App() {
   - Темп изменений: ${profile?.extra?.changeSpeed}
   - Цель: ${userRequest?.mainGoal}
   Отвечай коротко, по делу, с заботой. Используй данные профиля в ответах. Пиши на русском.`
-  const response = await fetch('/api/chat', {
+  const response = await fetch('https://rsvngqyaxvgxgkxkhjef.supabase.co/functions/v1/chat', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_KEY}`,
     },
     body: JSON.stringify({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 1000,
-      system: systemPrompt,
-      messages: [...chatMessages, { role: 'user', content: userMsg }].map(m => ({ role: m.role, content: m.content }))
+      messages: [...chatMessages, { role: 'user', content: userMsg }].map(m => ({ role: m.role, content: m.content })),
+      systemPrompt: systemPrompt
     })
   })
       const data = await response.json()
