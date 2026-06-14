@@ -903,14 +903,18 @@ body {
 
 /* ===== CHAT SCREEN ===== */
 .screen-chat {
-  height: 100dvh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
   display: flex;
   flex-direction: column;
   background: linear-gradient(160deg, #f0fdff 0%, #ecfeff 100%);
-  max-width: 390px;
-  margin: 0 auto;
   box-sizing: border-box;
   overflow: hidden;
+  overflow-x: hidden;
 }
 
 .chat-header {
@@ -958,11 +962,13 @@ body {
 
 .chat-messages {
   flex: 1;
+  min-height: 0;
   padding: 16px;
   display: flex;
   flex-direction: column;
   gap: 10px;
   overflow-y: auto;
+  overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
 }
 
@@ -1030,8 +1036,6 @@ body {
   border-top: 1px solid #cffafe;
   background: #ffffff;
   flex-shrink: 0;
-  position: sticky;
-  bottom: 0;
 }
 
 .chat-input {
