@@ -325,7 +325,7 @@ function App() {
 - Предлагай минимальные действия: 2 минуты, 10 секунд, один шаг
 - Для мозга важен факт выполнения, не объём
 
-ЦЕЛЬ: после каждого ответа пользователь думает: "Меня поняли. Я знаю что делать дальше."` Пиши на русском.`
+ЦЕЛЬ: после каждого ответа пользователь думает: "Меня поняли. Я знаю что делать дальше."`
   const response = await fetch('https://rsvngqyaxvgxgkxkhjef.supabase.co/functions/v1/chat', {
     method: 'POST',
     headers: {
@@ -350,17 +350,23 @@ setChatLoading(false)
   const q = questions[step]
   const rq = requestQuestions[requestStep]
 
+  const [selectedAnswer, setSelectedAnswer] = useState(null)
+
   const next = (value) => {
     const updated = { ...answers, [q.id]: value }
     setAnswers(updated)
-    if (step < questions.length - 1) {
-      setStep(step + 1)
-      setScaleValue(5)
-      setOpenText('')
-    } else {
-      setProfile(computeProfile(updated))
-      setScreen('mid')
-    }
+    setSelectedAnswer(value)
+    setTimeout(() => {
+      setSelectedAnswer(null)
+      if (step < questions.length - 1) {
+        setStep(step + 1)
+        setScaleValue(5)
+        setOpenText('')
+      } else {
+        setProfile(computeProfile(updated))
+        setScreen('mid')
+      }
+    }, 400)
   }
 
   const nextRequest = () => {
@@ -425,7 +431,11 @@ setChatLoading(false)
             {!q.isScale && !q.isOpen && (
               <div className="options">
                 {q.options.map((opt, i) => (
-                  <button key={i} className="option-btn" onClick={() => next(opt.value)}>
+                  <button
+                    key={i}
+                    className={`option-btn${selectedAnswer === opt.value ? ' selected' : ''}`}
+                    onClick={() => next(opt.value)}
+                  >
                     {opt.label}
                   </button>
                 ))}
@@ -489,8 +499,7 @@ setChatLoading(false)
 {screen === 'profile' && profile && (
   <div className="screen-profile-new">
    <div className="profile-card">
-   <p className="profile-card-title">{name}{', твой архетип'}</p>
-  <p className="profile-card-title">{profile.archetype.name}</p>
+   <p className="profile-card-title">{name}{', твой архетип — '}{profile.archetype.name}</p>
 </div>
 <div className="profile-card">
   <p className="profile-card-body">{profile.archetype.desc}</p>
@@ -501,6 +510,8 @@ setChatLoading(false)
           id: 'energy',
           label: 'Индекс энергии',
           value: `${profile.indices.energy}/100`,
+          percent: profile.indices.energy,
+          level: profile.indices.energy < 35 ? 'low' : profile.indices.energy < 65 ? 'mid' : 'high',
           short: profile.indices.energy < 35 ? 'Сейчас восстановление не успевает за нагрузкой' : profile.indices.energy < 65 ? 'Уровень энергии меняется от дня к дню' : 'Хороший запас энергии для изменений',
           detail: profile.indices.energy < 35
             ? 'Даже простые задачи могут требовать больше усилий, чем обычно. Сейчас важнее регулярность, чем объём. Начинай с самых простых действий, которые легко выполнить даже в непростой день.'
@@ -512,6 +523,8 @@ setChatLoading(false)
           id: 'readiness',
           label: 'Готовность к изменениям',
           value: `${profile.indices.readiness}/100`,
+          percent: profile.indices.readiness,
+          level: profile.indices.readiness < 35 ? 'low' : profile.indices.readiness < 65 ? 'mid' : 'high',
           short: profile.indices.readiness < 35 ? 'Сейчас изменения не в центре внимания' : profile.indices.readiness < 65 ? 'Интерес к изменениям есть, но пока нет устойчивого импульса' : 'Подходящий период для изменений',
           detail: profile.indices.readiness < 35
             ? 'Больше сил уходит на решение текущих задач. Полезнее сначала разобраться, что именно забирает внимание и желание двигаться дальше.'
@@ -523,6 +536,8 @@ setChatLoading(false)
           id: 'selfEfficacy',
           label: 'Самоэффективность',
           value: `${profile.indices.selfEfficacy}/100`,
+          percent: profile.indices.selfEfficacy,
+          level: profile.indices.selfEfficacy < 35 ? 'low' : profile.indices.selfEfficacy < 65 ? 'mid' : 'high',
           short: profile.indices.selfEfficacy < 35 ? 'Сложно рассчитывать на стабильность в долгосрочной перспективе' : profile.indices.selfEfficacy < 65 ? 'Уверенность во многом зависит от обстоятельств' : 'Обычно рассчитываешь на себя и веришь в результат',
           detail: profile.indices.selfEfficacy < 35
             ? 'Обычно это связано с предыдущим опытом, когда планы приходилось менять. Начинать с очень простых действий, которые легко выполнить даже в загруженный день.'
@@ -534,6 +549,8 @@ setChatLoading(false)
           id: 'burnout',
           label: 'Риск выгорания',
           value: profile.indices.burnoutRisk === 'high' ? 'Высокий' : profile.indices.burnoutRisk === 'medium' ? 'Средний' : 'Низкий',
+          percent: profile.indices.burnoutRisk === 'high' ? 20 : profile.indices.burnoutRisk === 'medium' ? 55 : 88,
+          level: profile.indices.burnoutRisk === 'high' ? 'low' : profile.indices.burnoutRisk === 'medium' ? 'mid' : 'high',
           short: profile.indices.burnoutRisk === 'high' ? 'Нагрузка занимает значительную часть ресурсов' : profile.indices.burnoutRisk === 'medium' ? 'Текущий баланс требует внимания' : 'Достаточно ресурса для постепенных изменений',
           detail: profile.indices.burnoutRisk === 'high'
             ? 'Даже полезные изменения могут восприниматься как дополнительное давление. Сосредоточиться на восстановлении устойчивого ритма. На старте лучше выбирать одну небольшую привычку.'
@@ -546,19 +563,22 @@ setChatLoading(false)
           <div className="index-col">
             <span className="index-label-new">{item.label}</span>
             <span className="index-explain">{item.short}</span>
+            <div className="index-progress-bar">
+              <div className="index-progress-fill" style={{ width: `${item.percent}%` }} data-level={item.level} />
+            </div>
             {expandedIndex === item.id && (
               <span className="index-detail">{item.detail}</span>
             )}
           </div>
           <div className="index-right">
-            <span className="index-value-new">{item.value}</span>
+            <span className={`index-value-new index-value-${item.level}`}>{item.value}</span>
             <span className="index-arrow">{expandedIndex === item.id ? 'свернуть ▲' : 'подробнее ↓'}</span>
           </div>
         </div>
       ))}
     </div>
     <p className="indices-section-label">{'Поведенческий профиль 🔒 — Basic и Pro'}</p>
-    <div className="indices-new indices-locked">
+    <div className="indices-new indices-locked indices-locked-basic">
     <div className="index-row-new locked-row">
 <span className="index-label-new">{'Тип мотивации'}</span>
 <span className="index-value-locked">{profile.extra.motivationType} 🔒</span>
@@ -581,7 +601,7 @@ setChatLoading(false)
       </div>
       </div>
     <p className="indices-section-label">{'Глубинный профиль 🔒 — только Pro'}</p>
-    <div className="indices-new indices-locked">
+    <div className="indices-new indices-locked indices-locked-pro">
       <div className="index-row-new locked-row">
         <span className="index-label-new">{'Триггеры срыва'}</span>
         <span className="index-value-locked">{'🔒'}</span>
@@ -697,7 +717,7 @@ setChatLoading(false)
 )}
 
 {screen === 'route' && profile && (
-<div className="screen-welcome">
+<div className="screen-welcome screen-route">
     <div className="welcome-content">
       <div className="logo">{'🌱'}</div>
       <h1 className="welcome-headline">{'Твой профиль собран.'}</h1>
