@@ -699,7 +699,11 @@ setChatLoading(false)
       ))}
       {chatLoading && (
         <div className="chat-message assistant">
-          <div className="chat-bubble chat-typing">{'...'}</div>
+          <div className="chat-bubble">
+            <div className="chat-typing-dots">
+              <span></span><span></span><span></span>
+            </div>
+          </div>
         </div>
       )}
     </div>

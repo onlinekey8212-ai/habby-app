@@ -906,7 +906,7 @@ body {
   height: 100dvh;
   display: flex;
   flex-direction: column;
-  background: #ffffff;
+  background: linear-gradient(160deg, #f0fdff 0%, #ecfeff 100%);
   max-width: 390px;
   margin: 0 auto;
   box-sizing: border-box;
@@ -919,6 +919,7 @@ body {
   padding: 14px 20px;
   background: linear-gradient(135deg, #ecfeff, #cffafe);
   border-bottom: 1px solid #cffafe;
+  box-shadow: 0 2px 12px rgba(8,145,178,0.1);
   gap: 12px;
   flex-shrink: 0;
 }
@@ -989,18 +990,37 @@ body {
 }
 
 .chat-message.assistant .chat-bubble {
-  background: #ecfeff;
+  background: #ffffff;
   color: #1a1a2e;
   border-bottom-left-radius: 4px;
-  border: 1px solid #cffafe;
+  border: 1px solid #e8f4f8;
+  box-shadow: 0 2px 8px rgba(8,145,178,0.1);
 }
 
-.chat-typing {
-  color: #06b6d4;
-  font-size: 18px;
-  letter-spacing: 4px;
-  padding: 8px 15px;
+/* ===== TYPING INDICATOR ===== */
+@keyframes typingBounce {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.35; }
+  30% { transform: translateY(-6px); opacity: 1; }
 }
+
+.chat-typing-dots {
+  display: flex;
+  gap: 5px;
+  padding: 4px 4px;
+  align-items: center;
+}
+
+.chat-typing-dots span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #0891b2;
+  animation: typingBounce 1.2s infinite ease-in-out;
+}
+
+.chat-typing-dots span:nth-child(1) { animation-delay: 0s; }
+.chat-typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+.chat-typing-dots span:nth-child(3) { animation-delay: 0.4s; }
 
 .chat-input-block {
   display: flex;
