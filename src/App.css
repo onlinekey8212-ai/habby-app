@@ -1107,3 +1107,96 @@ body {
 .unlock-block { width: 100%; text-align: center; padding: 16px 0 8px 0; }
 .unlock-text { font-size: 14px; color: #6b7280; margin-bottom: 12px; }
 .btn-unlock { background: #0891b2; color: white; border: none; border-radius: 12px; padding: 14px 32px; font-size: 16px; font-weight: 600; cursor: pointer; width: 100%; }
+
+/* ===== MIC BUTTON ===== */
+.chat-mic {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: 1.5px solid #cffafe;
+  background: #f8fafc;
+  color: #0891b2;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+
+.chat-mic.recording {
+  background: #fee2e2;
+  border-color: #ef4444;
+  color: #ef4444;
+  animation: micPulse 1s infinite;
+}
+
+.chat-mic.cooldown {
+  background: #f1f5f9;
+  border-color: #e2e8f0;
+  color: #94a3b8;
+  cursor: not-allowed;
+}
+
+@keyframes micPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.4); }
+  50% { box-shadow: 0 0 0 8px rgba(239,68,68,0); }
+}
+
+/* ===== RECORDING BAR ===== */
+.chat-recording-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 20px;
+  background: #fff5f5;
+  border-top: 1px solid #fee2e2;
+}
+
+.chat-recording-timer {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0891b2;
+  font-variant-numeric: tabular-nums;
+  min-width: 36px;
+  text-align: right;
+}
+
+.chat-recording-timer.danger {
+  color: #ef4444;
+  animation: timerBlink 0.6s infinite;
+}
+
+@keyframes timerBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* ===== RECORDING WAVES ===== */
+.chat-recording-waves {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  height: 24px;
+}
+
+.chat-recording-waves span {
+  display: block;
+  width: 3px;
+  border-radius: 3px;
+  background: #ef4444;
+  animation: wave 0.8s infinite ease-in-out;
+}
+
+.chat-recording-waves span:nth-child(1) { height: 6px;  animation-delay: 0s; }
+.chat-recording-waves span:nth-child(2) { height: 14px; animation-delay: 0.1s; }
+.chat-recording-waves span:nth-child(3) { height: 20px; animation-delay: 0.2s; }
+.chat-recording-waves span:nth-child(4) { height: 14px; animation-delay: 0.3s; }
+.chat-recording-waves span:nth-child(5) { height: 6px;  animation-delay: 0.4s; }
+
+@keyframes wave {
+  0%, 100% { transform: scaleY(1); opacity: 0.6; }
+  50% { transform: scaleY(1.6); opacity: 1; }
+}

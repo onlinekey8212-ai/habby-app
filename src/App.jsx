@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import './App.css'
 
 const questions = [
@@ -289,6 +289,14 @@ function App() {
   const [chatInput, setChatInput] = useState('')
   const [chatLoading, setChatLoading] = useState(false)
   const [activeTab, setActiveTab] = useState('tracker')
+  const [isRecording, setIsRecording] = useState(false)
+  const [recordingSeconds, setRecordingSeconds] = useState(0)
+  const [micCooldown, setMicCooldown] = useState(0)
+  const [transcribing, setTranscribing] = useState(false)
+  const mediaRecorderRef = useRef(null)
+  const audioChunksRef = useRef([])
+  const recordingTimerRef = useRef(null)
+  const cooldownTimerRef = useRef(null)
   const [habits, setHabits] = useState([
     { id: 1, name: 'Утренняя зарядка', trigger: 'После пробуждения', icon: '🏃', done: false, days: [true, true, false, true, true, false, false] },
     { id: 2, name: 'Читать 10 минут', trigger: 'После ужина', icon: '📖', done: false, days: [true, false, true, true, false, true, false] },
@@ -302,6 +310,74 @@ function App() {
       ])
     }
   }, [screen])
+
+  const MAX_RECORDING = 60
+  const COOLDOWN_DURATION = 60
+
+  const startRecording = async () => {
+    if (micCooldown > 0 || transcribing) return
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      const mediaRecorder = new MediaRecorder(stream)
+      mediaRecorderRef.current = mediaRecorder
+      audioChunksRef.current = []
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) audioChunksRef.current.push(e.data)
+      }
+      mediaRecorder.start(100)
+      setIsRecording(true)
+      setRecordingSeconds(0)
+      let elapsed = 0
+      recordingTimerRef.current = setInterval(() => {
+        elapsed += 1
+        setRecordingSeconds(elapsed)
+        if (elapsed >= MAX_RECORDING) stopRecording()
+        if (elapsed === MAX_RECORDING - 10 && navigator.vibrate) navigator.vibrate([100, 50, 100])
+      }, 1000)
+    } catch {
+      alert('Нет доступа к микрофону')
+    }
+  }
+
+  const stopRecording = () => {
+    if (!mediaRecorderRef.current) return
+    clearInterval(recordingTimerRef.current)
+    mediaRecorderRef.current.onstop = async () => {
+      const blob = new Blob(audioChunksRef.current, { type: 'audio/webm' })
+      mediaRecorderRef.current.stream.getTracks().forEach(t => t.stop())
+      setIsRecording(false)
+      setRecordingSeconds(0)
+      setTranscribing(true)
+      try {
+        const form = new FormData()
+        form.append('audio', blob, 'audio.webm')
+        const res = await fetch('https://rsvngqyaxvgxgkxkhjef.supabase.co/functions/v1/transcribe', {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_KEY}` },
+          body: form,
+        })
+        const data = await res.json()
+        if (data.text) setChatInput(prev => (prev ? prev + ' ' : '') + data.text)
+      } catch {
+        alert('Ошибка распознавания речи')
+      } finally {
+        setTranscribing(false)
+        let cd = COOLDOWN_DURATION
+        setMicCooldown(cd)
+        cooldownTimerRef.current = setInterval(() => {
+          cd -= 1
+          setMicCooldown(cd)
+          if (cd <= 0) clearInterval(cooldownTimerRef.current)
+        }, 1000)
+      }
+    }
+    mediaRecorderRef.current.stop()
+  }
+
+  const toggleRecording = () => {
+    if (isRecording) stopRecording()
+    else startRecording()
+  }
 
   const sendChatMessage = async () => {
     if (!chatInput.trim() || chatLoading) return
@@ -856,15 +932,40 @@ setChatLoading(false)
         </div>
       )}
     </div>
+    {isRecording && (
+      <div className="chat-recording-bar">
+        <div className="chat-recording-waves">
+          <span/><span/><span/><span/><span/>
+        </div>
+        <span className={`chat-recording-timer${recordingSeconds >= MAX_RECORDING - 10 ? ' danger' : ''}`}>
+          {`0:${String(MAX_RECORDING - recordingSeconds).padStart(2, '0')}`}
+        </span>
+      </div>
+    )}
     <div className="chat-input-block">
+      <button
+        className={`chat-mic${isRecording ? ' recording' : ''}${micCooldown > 0 ? ' cooldown' : ''}`}
+        onClick={toggleRecording}
+        disabled={transcribing}
+        title={micCooldown > 0 ? `Доступно через ${micCooldown}с` : isRecording ? 'Остановить' : 'Голосовое сообщение'}
+      >
+        {transcribing ? '…' : micCooldown > 0 ? micCooldown : (
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <rect x="9" y="2" width="6" height="12" rx="3"/>
+            <path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/>
+            <line x1="8" y1="22" x2="16" y2="22"/>
+          </svg>
+        )}
+      </button>
       <input
         className="chat-input"
-        placeholder="Напиши вопрос..."
+        placeholder={isRecording ? 'Запись...' : transcribing ? 'Распознаю...' : 'Напиши вопрос...'}
         value={chatInput}
         onChange={(e) => setChatInput(e.target.value)}
         onKeyDown={(e) => e.key === 'Enter' && sendChatMessage()}
+        disabled={isRecording}
       />
-      <button className="chat-send" onClick={sendChatMessage}>{'→'}</button>
+      <button className="chat-send" onClick={sendChatMessage} disabled={isRecording || !chatInput.trim()}>{'→'}</button>
     </div>
   </div>
 )}
