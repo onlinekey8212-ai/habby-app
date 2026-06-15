@@ -284,7 +284,7 @@ function App() {
   const [expandedIndex, setExpandedIndex] = useState(null)
   const [expandedPricing, setExpandedPricing] = useState(null)
   const [chatMessages, setChatMessages] = useState([
-    { role: 'assistant', content: `Привет, ${name || 'друг'}! Я Habby AI — твой персональный коуч. Я знаю твой архетип, индексы и цели. Чем могу помочь?` }
+    { role: 'assistant', content: `${name}, я персональный коуч Habby. Буду помогать тебе на основе твоих данных, научных принципов изменения поведения и авторской методологии Habby. С чего начнём?` }
   ])
   const [chatInput, setChatInput] = useState('')
   const [chatLoading, setChatLoading] = useState(false)
