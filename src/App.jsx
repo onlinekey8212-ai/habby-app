@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import './App.css'
 
 const questions = [
@@ -284,11 +284,19 @@ function App() {
   const [expandedIndex, setExpandedIndex] = useState(null)
   const [expandedPricing, setExpandedPricing] = useState(null)
   const [chatMessages, setChatMessages] = useState([
-    { role: 'assistant', content: `${name}, я персональный коуч Habby. Буду помогать тебе на основе твоих данных, научных принципов изменения поведения и авторской методологии Habby. С чего начнём?` }
+    { role: 'assistant', content: `я персональный коуч Habby. Буду помогать тебе на основе твоих данных, научных принципов изменения поведения и авторской методологии Habby. С чего начнём?` }
   ])
   const [chatInput, setChatInput] = useState('')
   const [chatLoading, setChatLoading] = useState(false)
-  
+
+  useEffect(() => {
+    if (screen === 'chat' && name) {
+      setChatMessages([
+        { role: 'assistant', content: `${name}, я персональный коуч Habby. Буду помогать тебе на основе твоих данных, научных принципов изменения поведения и авторской методологии Habby. С чего начнём?` }
+      ])
+    }
+  }, [screen])
+
   const sendChatMessage = async () => {
     if (!chatInput.trim() || chatLoading) return
     const userMsg = chatInput.trim()

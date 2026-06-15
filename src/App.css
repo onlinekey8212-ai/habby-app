@@ -1050,6 +1050,7 @@ body {
 
 .chat-input {
   flex: 1;
+  min-width: 0;
   border: 1.5px solid #cffafe;
   border-radius: 24px;
   padding: 11px 18px;
@@ -1059,6 +1060,7 @@ body {
   background: #f8fafc;
   transition: border-color 0.2s;
   font-family: inherit;
+  box-sizing: border-box;
 }
 
 .chat-input:focus {
