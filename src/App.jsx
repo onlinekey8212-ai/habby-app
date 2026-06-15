@@ -892,13 +892,28 @@ setChatLoading(false)
   <button className="btn-pricing-pro">{'Выбрать Pro'}</button>
       </div>
       </div>
-      <div className="habby-ai-card" onClick={() => { setActiveTab('tracker'); setScreen('tracker') }}>
+      <div className="habby-ai-card" onClick={() => setScreen('chat')}>
         <div className="habby-ai-card-icon">{'🌱'}</div>
         <div>
-          <div className="habby-ai-card-title">{'Начать с Habby'}</div>
-          <div className="habby-ai-card-sub">{'Открыть трекер привычек'}</div>
+          <div className="habby-ai-card-title">{'Habby AI — твой коуч'}</div>
+          <div className="habby-ai-card-sub">{'Задай любой вопрос о своём профиле'}</div>
         </div>
       </div>
+      <button
+        onClick={() => setScreen('tracker')}
+        style={{
+          width: '100%',
+          background: 'white',
+          color: '#0891b2',
+          border: '1.5px solid #0891b2',
+          borderRadius: '12px',
+          padding: '14px',
+          fontSize: '16px',
+          fontWeight: '500',
+          cursor: 'pointer',
+          marginTop: '12px'
+        }}
+      >{'📋 Трекер привычек'}</button>
     </div>
   </div>
 )}
@@ -991,7 +1006,7 @@ setChatLoading(false)
   </div>
 )}
 
-{(screen === 'chat' || screen === 'tracker') && profile && (
+{screen === 'tracker' && profile && (
   <div style={{
     position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)',
     width: '100%', maxWidth: '390px', background: 'white',
