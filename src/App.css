@@ -926,6 +926,11 @@ body {
   box-shadow: 0 2px 12px rgba(8,145,178,0.1);
   gap: 12px;
   flex-shrink: 0;
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .chat-back {
@@ -970,6 +975,8 @@ body {
   overflow-y: auto;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .chat-message {
@@ -1036,6 +1043,9 @@ body {
   border-top: 1px solid #cffafe;
   background: #ffffff;
   flex-shrink: 0;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .chat-input {
