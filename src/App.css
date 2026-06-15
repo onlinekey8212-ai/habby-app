@@ -905,10 +905,11 @@ body {
 .screen-chat {
   position: fixed;
   top: 0;
-  left: 0;
-  right: 0;
   bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
   width: 100%;
+  max-width: 390px;
   display: flex;
   flex-direction: column;
   background: linear-gradient(160deg, #f0fdff 0%, #ecfeff 100%);
