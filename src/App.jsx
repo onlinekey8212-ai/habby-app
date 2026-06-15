@@ -288,6 +288,12 @@ function App() {
   ])
   const [chatInput, setChatInput] = useState('')
   const [chatLoading, setChatLoading] = useState(false)
+  const [activeTab, setActiveTab] = useState('tracker')
+  const [habits, setHabits] = useState([
+    { id: 1, name: 'Утренняя зарядка', trigger: 'После пробуждения', icon: '🏃', done: false, days: [true, true, false, true, true, false, false] },
+    { id: 2, name: 'Читать 10 минут', trigger: 'После ужина', icon: '📖', done: false, days: [true, false, true, true, false, true, false] },
+    { id: 3, name: 'Стакан воды утром', trigger: 'Перед завтраком', icon: '💧', done: false, days: [true, true, true, true, true, true, false] },
+  ])
 
   useEffect(() => {
     if (screen === 'chat' && name) {
@@ -886,16 +892,140 @@ setChatLoading(false)
   <button className="btn-pricing-pro">{'Выбрать Pro'}</button>
       </div>
       </div>
-      <div className="habby-ai-card" onClick={() => setScreen('chat')}>
+      <div className="habby-ai-card" onClick={() => { setActiveTab('tracker'); setScreen('tracker') }}>
         <div className="habby-ai-card-icon">{'🌱'}</div>
         <div>
-          <div className="habby-ai-card-title">{'Habby AI — твой коуч'}</div>
-          <div className="habby-ai-card-sub">{'Задай любой вопрос о своём профиле'}</div>
+          <div className="habby-ai-card-title">{'Начать с Habby'}</div>
+          <div className="habby-ai-card-sub">{'Открыть трекер привычек'}</div>
         </div>
       </div>
     </div>
   </div>
 )}
+
+{screen === 'tracker' && profile && (
+  <div style={{ minHeight: '100vh', background: 'linear-gradient(160deg, #f0fdff 0%, #ecfeff 100%)', paddingBottom: '80px' }}>
+    <div style={{ background: 'linear-gradient(135deg, #0891b2, #0e7490)', padding: '48px 20px 20px', color: 'white' }}>
+      <div style={{ fontSize: '13px', opacity: 0.8, marginBottom: '4px' }}>
+        {new Date().toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long' })}
+      </div>
+      <div style={{ fontSize: '20px', fontWeight: 700, marginBottom: '12px' }}>
+        {name} · {profile?.archetype?.name}
+      </div>
+      <div style={{ display: 'flex', gap: '6px', marginBottom: '16px' }}>
+        {['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].map((d, i) => (
+          <div key={i} style={{ flex: 1, textAlign: 'center' }}>
+            <div style={{ fontSize: '10px', opacity: 0.7, marginBottom: '4px' }}>{d}</div>
+            <div style={{
+              width: '28px', height: '28px', borderRadius: '50%', margin: '0 auto',
+              background: i < 5 ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.25)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: '14px'
+            }}>{i < 5 ? '✓' : ''}</div>
+          </div>
+        ))}
+      </div>
+      <div style={{ display: 'flex', gap: '12px' }}>
+        <div style={{ background: 'rgba(255,255,255,0.15)', borderRadius: '12px', padding: '8px 14px', fontSize: '13px' }}>
+          🔥 5 дней подряд
+        </div>
+        <div style={{ background: 'rgba(255,255,255,0.15)', borderRadius: '12px', padding: '8px 14px', fontSize: '13px' }}>
+          ✓ {habits.filter(h => h.done).length}/{habits.length} сегодня
+        </div>
+      </div>
+    </div>
+
+    <div style={{ padding: '20px 16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+      {habits.map(habit => (
+        <div
+          key={habit.id}
+          onClick={() => {
+            if (navigator.vibrate) navigator.vibrate(50)
+            setHabits(prev => prev.map(h => h.id === habit.id ? { ...h, done: !h.done } : h))
+          }}
+          style={{
+            background: habit.done ? 'linear-gradient(135deg, #d1fae5, #a7f3d0)' : '#ffffff',
+            border: habit.done ? '1.5px solid #34d399' : '1.5px solid #e2e8f0',
+            borderRadius: '16px', padding: '14px 16px',
+            display: 'flex', alignItems: 'center', gap: '12px',
+            cursor: 'pointer', transition: 'all 0.2s ease',
+            boxShadow: habit.done ? '0 2px 8px rgba(52,211,153,0.2)' : '0 2px 8px rgba(0,0,0,0.04)'
+          }}
+        >
+          <div style={{
+            width: '40px', height: '40px', borderRadius: '12px', fontSize: '20px',
+            background: habit.done ? 'rgba(52,211,153,0.2)' : '#f0fdff',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
+          }}>{habit.done ? '✓' : habit.icon}</div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontWeight: 600, fontSize: '15px', color: habit.done ? '#065f46' : '#1a1a2e' }}>{habit.name}</div>
+            <div style={{ fontSize: '12px', color: '#6b7280', marginTop: '2px' }}>{habit.trigger}</div>
+          </div>
+          <div style={{ display: 'flex', gap: '3px' }}>
+            {habit.days.map((done, i) => (
+              <div key={i} style={{
+                width: '6px', height: '6px', borderRadius: '50%',
+                background: done ? '#0891b2' : '#e2e8f0'
+              }} />
+            ))}
+          </div>
+        </div>
+      ))}
+
+      <div style={{ background: 'white', borderRadius: '16px', padding: '14px 16px', border: '1.5px solid #cffafe', marginTop: '4px' }}>
+        <div style={{ fontSize: '12px', color: '#0891b2', fontWeight: 600, marginBottom: '6px' }}>🌱 Habby AI</div>
+        <div style={{ fontSize: '14px', color: '#374151', lineHeight: 1.5 }}>
+          По твоим данным, утренние привычки даются тебе легче. Начни день с самого простого действия — это задаёт тон всему остальному.
+        </div>
+      </div>
+
+      <button
+        onClick={() => {}}
+        style={{
+          background: 'transparent', border: '1.5px dashed #06b6d4',
+          borderRadius: '16px', padding: '14px', color: '#0891b2',
+          fontSize: '15px', cursor: 'pointer', fontWeight: 500
+        }}
+      >+ Добавить привычку</button>
+    </div>
+  </div>
+)}
+
+{(screen === 'chat' || screen === 'tracker') && profile && (
+  <div style={{
+    position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)',
+    width: '100%', maxWidth: '390px', background: 'white',
+    borderTop: '0.5px solid #cffafe', display: 'flex', zIndex: 100,
+    paddingBottom: 'env(safe-area-inset-bottom)'
+  }}>
+    <button onClick={() => { setActiveTab('tracker'); setScreen('tracker') }} style={{
+      flex: 1, padding: '10px 0', border: 'none', background: 'transparent',
+      color: activeTab === 'tracker' ? '#0891b2' : '#94a3b8',
+      fontSize: '11px', cursor: 'pointer', display: 'flex', flexDirection: 'column',
+      alignItems: 'center', gap: '3px'
+    }}>
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+        <rect x="3" y="4" width="18" height="18" rx="3"/><line x1="3" y1="9" x2="21" y2="9"/>
+        <line x1="9" y1="4" x2="9" y2="9"/><circle cx="8" cy="14" r="1.5" fill="currentColor"/>
+        <circle cx="12" cy="14" r="1.5" fill="currentColor"/><circle cx="16" cy="14" r="1.5" fill="currentColor"/>
+        <circle cx="8" cy="18" r="1.5" fill="currentColor"/>
+      </svg>
+      Трекер
+    </button>
+    <button onClick={() => { setActiveTab('chat'); setScreen('chat') }} style={{
+      flex: 1, padding: '10px 0', border: 'none', background: 'transparent',
+      color: activeTab === 'chat' ? '#0891b2' : '#94a3b8',
+      fontSize: '11px', cursor: 'pointer', display: 'flex', flexDirection: 'column',
+      alignItems: 'center', gap: '3px'
+    }}>
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+      </svg>
+      Habby AI
+    </button>
+  </div>
+)}
+
 </div>
   )
 }
